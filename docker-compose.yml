@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-task-api
+    ports:
+      - "${DOCKER_PORT}:3000"
+    environment:
+      PORT: 3000
+      MONGO_URI: ${DOCKER_MONGO_URI}
+      NODE_ENV: production
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:latest
+    container_name: backend-task-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DOCKER_MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DOCKER_MONGO_PASS}
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
