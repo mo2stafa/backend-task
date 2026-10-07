@@ -2,8 +2,9 @@ const { randomUUID } = require('crypto');
 const { Post } = require('../../../domain/posts/entities/Post');
 
 class CreatePost {
-  constructor(postRepository) {
+  constructor(postRepository, postEventService) {
     this.postRepository = postRepository;
+    this.postEventService = postEventService;
   }
 
   async execute({ title, content }) {
@@ -14,7 +15,11 @@ class CreatePost {
       createdAt: new Date(),
     });
 
-    return this.postRepository.save(post);
+    const saved = await this.postRepository.save(post);
+    await this.postEventService.emitPostCreated(saved);
+
+    return saved;
+
   }
 }
 
