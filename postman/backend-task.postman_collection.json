@@ -1,0 +1,146 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "backend-task",
+    "description": "Posts API for the Units Backend Task. Covers create, list, and get. Requires the 'backend-task' environment with a baseUrl variable.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Simple liveness probe. Returns { status: 'ok' }."
+      },
+      "response": []
+    },
+    {
+      "name": "Create post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('response has id, title, content', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('id');",
+              "  pm.expect(json.title).to.eql('Hello from Postman');",
+              "  pm.expect(json).to.have.property('content');",
+              "});",
+              "",
+              "// Save the created post id so 'Get post' can use it.",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('postId', json.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Hello from Postman\",\n  \"content\": \"This post was created via the Postman collection.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posts",
+          "host": ["{{baseUrl}}"],
+          "path": ["posts"]
+        },
+        "description": "Creates a post. On success, the returned id is stored in the collection variable 'postId' for the 'Get post' request."
+      },
+      "response": []
+    },
+    {
+      "name": "List posts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response is an array', function () {",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts",
+          "host": ["{{baseUrl}}"],
+          "path": ["posts"]
+        },
+        "description": "Lists all posts, newest first."
+      },
+      "response": []
+    },
+    {
+      "name": "Get post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response has id matching request', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.id).to.eql(pm.collectionVariables.get('postId'));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/posts/{{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["posts", "{{postId}}"]
+        },
+        "description": "Fetches a single post by id. Uses the 'postId' collection variable set by 'Create post'."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "postId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
